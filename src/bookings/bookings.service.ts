@@ -3,13 +3,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateBookingDto } from './dto/create-booking.dto';
 import { Prisma } from '../generated/prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
+import { CreateBookingDto } from './dto/create-booking.dto';
 
 @Injectable()
 export class BookingsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly realtime: RealtimeGateway,
+  ) {}
 
   async create(dto: CreateBookingDto) {
     const slot = await this.prisma.slot.findUnique({
@@ -43,6 +47,8 @@ export class BookingsService {
         },
       });
 
+      this.realtime.emitSlotBooked(booking.slotId, booking.id);
+
       return booking;
     } catch (error) {
       if (
@@ -60,6 +66,7 @@ export class BookingsService {
       throw error;
     }
   }
+
   async cancel(bookingId: string) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
@@ -85,7 +92,7 @@ export class BookingsService {
       return booking;
     }
 
-    return this.prisma.booking.update({
+    const cancelled = await this.prisma.booking.update({
       where: { id: bookingId },
       data: {
         status: 'cancelled',
@@ -98,5 +105,9 @@ export class BookingsService {
         status: true,
       },
     });
+
+    this.realtime.emitSlotReleased(cancelled.slotId, cancelled.id);
+
+    return cancelled;
   }
 }
