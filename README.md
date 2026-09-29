@@ -527,7 +527,7 @@ No repositories, CQRS, event bus, or additional abstraction layers were introduc
 
 Given more time, possible improvements would include:
 
-- reusable Swagger response DTOs instead of inline schemas
+- broader OpenAPI contract tests
 - additional validation and error-path tests
 - dedicated automated Socket.IO tests
 - graceful application shutdown hooks
