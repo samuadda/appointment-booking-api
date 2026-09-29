@@ -92,11 +92,18 @@ export class BookingsService {
       return booking;
     }
 
-    const cancelled = await this.prisma.booking.update({
-      where: { id: bookingId },
+    const result = await this.prisma.booking.updateMany({
+      where: {
+        id: bookingId,
+        status: 'active',
+      },
       data: {
         status: 'cancelled',
       },
+    });
+
+    const cancelled = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
       select: {
         id: true,
         slotId: true,
@@ -106,7 +113,18 @@ export class BookingsService {
       },
     });
 
-    this.realtime.emitSlotReleased(cancelled.slotId, cancelled.id);
+    if (!cancelled) {
+      throw new NotFoundException({
+        error: {
+          code: 'BOOKING_NOT_FOUND',
+          message: 'Booking not found.',
+        },
+      });
+    }
+
+    if (result.count === 1) {
+      this.realtime.emitSlotReleased(cancelled.slotId, cancelled.id);
+    }
 
     return cancelled;
   }

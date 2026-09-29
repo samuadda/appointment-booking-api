@@ -560,12 +560,12 @@ I understand the implementation and can explain or modify the code during review
 Actual implementation time:
 
 ```text
-TODO: add actual implementation time
+Approximately 7–8 hours total
 ```
 
 The requested 2–3 hour duration was treated as a target rather than a strict limit.
 
-Additional time was spent understanding and validating the stack, debugging local tooling configuration, and ensuring that concurrency behavior and automated tests worked correctly.
+Additional time was spent on local environment setup, Prisma/Jest/ESM tooling configuration, learning and integrating newer aspects of the stack, and rigorously validating concurrency handling and automated test suites.
 
 ---
 
